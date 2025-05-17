@@ -81,6 +81,15 @@ You can create a widget and let it show only when the cable is locked in the cha
             name: Tijd tot hoogste prijs
         title: Dynamisch Laadoverzicht
         show_header_toggle: true
+        visibility:
+          - condition: state
+            entity: binary_sensor.supercharger_cable_locked
+            state: 'off'
 ````
+
+### Notes
+
+I am still testing this and will update the scripts if needed. As always YMMV.
+
 
 
