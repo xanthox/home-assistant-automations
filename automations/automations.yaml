@@ -1,0 +1,259 @@
+- id: '1746860019958'
+  alias: Smart charging - cheap charge when cable is connected or not
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: time_pattern
+    minutes: '0'
+    seconds: '30'
+  - trigger: state
+    entity_id:
+    - binary_sensor.supercharger_cable_locked
+    to: 'off'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.smartcharging
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.cheap_charging
+      state: 'off'
+    - condition: numeric_state
+      entity_id: sensor.tesla_battery_level
+      above: input_number.minimaal_ev_batterij
+    then:
+    - action: easee.set_charger_dynamic_limit
+      metadata: {}
+      data:
+        current: 0
+        time_to_live: 0
+        device_id: bdfd1052e2dd0fdd18eae27641197453
+    else:
+    - if:
+      - condition: state
+        entity_id: input_boolean.cheap_charging
+        state: 'on'
+      then:
+      - action: easee.set_charger_dynamic_limit
+        metadata: {}
+        data:
+          current: 32
+          time_to_live: 0
+          device_id: bdfd1052e2dd0fdd18eae27641197453
+      else:
+      - action: easee.set_charger_dynamic_limit
+        metadata: {}
+        data:
+          current: 32
+          time_to_live: 0
+      - action: notify.mobile_app_pixel_9_pro_xl
+        metadata: {}
+        data:
+          message: No cheap charge, car battery SoC is below desired state!
+          title: Smart charging override
+  mode: single
+- id: '1746860824359'
+  alias: Smart charging turn on on cheap hours when car is already connected
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.cheap_charging
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.smartcharging
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      current: 32
+      time_to_live: 0
+      device_id: bdfd1052e2dd0fdd18eae27641197453
+  mode: single
+- id: '1746861363820'
+  alias: Stop charging when cheap hours are over and cable is already connected
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.cheap_charging
+    to: 'off'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.smartcharging
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      current: 0
+      time_to_live: 0
+      device_id: bdfd1052e2dd0fdd18eae27641197453
+  mode: single
+- id: '1746861790185'
+  alias: Turn on smartcharging switch when we disconnect
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.supercharger_cable_locked
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.smartcharging
+    data: {}
+  mode: single
+- id: '1746869100902'
+  alias: Smart charging - Stop when reaching min desired EV SoC
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.tesla_battery_level
+    above: input_number.minimaal_ev_batterij
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.cheap_charging
+      state: 'on'
+    then:
+    - action: easee.set_charger_dynamic_limit
+      metadata: {}
+      data:
+        current: 32
+        time_to_live: 0
+        device_id: bdfd1052e2dd0fdd18eae27641197453
+    else:
+    - action: easee.set_charger_dynamic_limit
+      metadata: {}
+      data:
+        current: 0
+        time_to_live: 0
+        device_id: bdfd1052e2dd0fdd18eae27641197453
+  mode: single
+- id: '1746869349927'
+  alias: Smart Charging - Start when smart charging switch is turned off
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.smartcharging
+    to: 'off'
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      current: 32
+      time_to_live: 0
+      device_id: bdfd1052e2dd0fdd18eae27641197453
+  - action: notify.mobile_app_pixel_9_pro_xl
+    metadata: {}
+    data:
+      message: Smart charging switch is off! We will charge regardless of current
+        energy tarrif!
+      title: Smart charging notification
+  mode: single
+- id: '1746869887250'
+  alias: Smart charging - Cable connected and smartcharging is off
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.supercharger_cable_locked
+    to: 'off'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.smartcharging
+    state: 'off'
+  actions:
+  - action: easee.set_charger_dynamic_limit
+    metadata: {}
+    data:
+      current: 32
+      time_to_live: 0
+      device_id: bdfd1052e2dd0fdd18eae27641197453
+  - action: notify.mobile_app_pixel_9_pro_xl
+    metadata: {}
+    data:
+      message: Smart charging switch is off! We will charge regardless of current
+        energy tarrif!
+      title: Smart charging notification
+  mode: single
+- id: '1746960356394'
+  alias: Smart charging - Enabled smartcharging while plugged
+  description: Smartcharging enabled when already plugged in. We will evaluate the
+    conditions to check if we may continue, or need to stop.
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.smartcharging
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.supercharger_cable_locked
+    state: 'off'
+  actions:
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.tesla_battery_level
+      above: input_number.minimaal_ev_batterij
+    - condition: state
+      entity_id: input_boolean.cheap_charging
+      state: 'on'
+    then:
+    - action: easee.set_charger_dynamic_limit
+      metadata: {}
+      data:
+        current: 32
+        time_to_live: 0
+        device_id: bdfd1052e2dd0fdd18eae27641197453
+    else:
+    - if:
+      - condition: numeric_state
+        entity_id: sensor.tesla_battery_level
+        below: input_number.minimaal_ev_batterij
+      then:
+      - action: easee.set_charger_dynamic_limit
+        metadata: {}
+        data:
+          current: 32
+          time_to_live: 0
+          device_id: bdfd1052e2dd0fdd18eae27641197453
+      - action: notify.mobile_app_pixel_9_pro_xl
+        metadata: {}
+        data:
+          message: We charge in peak hours as the SoC of the EV is below the desired
+            state!
+          title: Smartcharging
+      else:
+      - action: easee.set_charger_dynamic_limit
+        metadata: {}
+        data:
+          current: 0
+          time_to_live: 0
+          device_id: bdfd1052e2dd0fdd18eae27641197453
+  mode: single

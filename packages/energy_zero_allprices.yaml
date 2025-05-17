@@ -1,0 +1,40 @@
+# Today - Hourly energy prices
+template:
+  - trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        hours: "*"
+    action:
+      - service: energyzero.get_energy_prices
+        response_variable: response
+        data:
+          config_entry: 213e682c375812e4e6796b4c2b2e1e0c
+          incl_vat: True
+    sensor:
+      - name: Energy prices - Today
+        device_class: timestamp
+        state: "{{ now() }}"
+        attributes:
+          prices: '{{ response.prices }}'
+
+  # Tomorrow - Hourly energy prices
+  - trigger:
+      - platform: homeassistant
+        event: start
+      - platform: template
+        value_template: "{{ now() > today_at('14:00') and now().minute == 0 }}"
+    action:
+      - service: energyzero.get_energy_prices
+        response_variable: response
+        data:
+          config_entry: 213e682c375812e4e6796b4c2b2e1e0c
+          start: "{{ now() + timedelta(days=1) }}"
+          end: "{{ now() + timedelta(days=1) }}"
+          incl_vat: True
+    sensor:
+      - name: Energy prices - Tomorrow
+        device_class: timestamp
+        state: "{{ now() + timedelta(days=1) }}"
+        attributes:
+          prices: '{{ response.prices }}'
