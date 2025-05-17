@@ -20,7 +20,7 @@ For information about HACS, see https://hacs.xyz/docs/use/
 
 Install the Easee integration from HACS and the Energyzero integration from Home Assistant, then install the Addon AppDaemon. Restart Homeassistant
 
-### AppDaemin
+### AppDaemon
 
 Put the two files for Appdaemon in your addon folder. It should be in /addon_configs/(random string)_appdaemon/apps/
 
@@ -44,6 +44,8 @@ Add a 'toggle' which will be an input_boolean.
 Add the automations to your system by adding them to automations.yaml.
 
 **NOTE**: Replace your car battery sensor by one you have. If you don't have a car battery sensor, disable this part in the automation!
+
+**NOTE**: If you do not have an Equalizer from Easee, you might want to set the Max amp to something else than 32A. The Equalizer will tell the charging station to stay at or below the maximum circuit breaker capacity.
 
 ### TODO
 
@@ -90,6 +92,7 @@ You can create a widget and let it show only when the cable is locked in the cha
 ### Notes
 
 I am still testing this and will update the scripts if needed. As always YMMV.
+
 
 
 
