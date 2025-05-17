@@ -49,5 +49,38 @@ Add the automations to your system by adding them to automations.yaml.
 
 * Make it possible to set a min_price so when we calculate we will stay at or under this price.
 
+## Sample widget
+
+![HA_Dynamic_chrg](https://github.com/user-attachments/assets/89e2377f-a555-4bf0-9a7f-62300869adef)
+
+You can create a widget and let it show only when the cable is locked in the charger station. Sample yaml code
+
+```yaml
+- type: entities
+        entities:
+          - entity: input_boolean.cheap_charging
+            name: Goedkoop tarief
+            secondary_info: last-changed
+          - entity: sensor.tesla_battery_level
+            secondary_info: last-updated
+            name: Batterijniveau Auto
+          - entity: binary_sensor.supercharger_cable_locked
+            name: Kabel in laadpaal
+            secondary_info: last-updated
+          - entity: input_number.minimaal_ev_batterij
+            secondary_info: none
+            name: Minimale acculading
+          - entity: input_boolean.smartcharging
+            name: Smartcharging
+          - entity: sensor.supercharger_dynamic_charger_limit
+            name: Amperage laadstation
+          - entity: sensor.energyzero_today_energy_lowest_price_time
+            name: Tijd tot laagste prijs
+            secondary_info: none
+          - entity: sensor.energyzero_today_energy_highest_price_time
+            name: Tijd tot hoogste prijs
+        title: Dynamisch Laadoverzicht
+        show_header_toggle: true
+````
 
 
