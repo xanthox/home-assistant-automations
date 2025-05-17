@@ -45,7 +45,7 @@ Add the automations to your system by adding them to automations.yaml.
 
 **NOTE**: Replace your car battery sensor by one you have. If you don't have a car battery sensor, disable this part in the automation!
 
-**NOTE**: If you do not have an Equalizer from Easee, you might want to set the Max amp to something else than 32A. The Equalizer will tell the charging station to stay at or below the maximum circuit breaker capacity.
+**NOTE**: If you do not have an Equalizer from Easee, you might want to set the Max amp to something else than 32A. The Equalizer will tell the charging station to stay at or below the maximum circuit breaker capacity, based on current other power usage by reading your P1 port from the grid maintainer. 
 
 ### TODO
 
