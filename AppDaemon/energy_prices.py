@@ -8,6 +8,15 @@ class CheapEnergyControl(hass.Hass):
         self.run_every(self.check_energy_prices, "now", 60*60)
         # Also run when energy prices are updated
         self.listen_state(self.energy_prices_changed, "sensor.energy_prices_today")
+        
+        # Get and store timezone information at initialization
+        try:
+            # Try to get timezone from AppDaemon configuration
+            self.timezone_str = self.get_plugin_config()["time_zone"]
+        except (KeyError, TypeError):
+            # Fallback to a default timezone if not available
+            self.timezone_str = "Europe/Amsterdam"  # Replace with your default timezone
+            self.log(f"Timezone not found in config, using default: {self.timezone_str}", level="WARNING")
 
     def energy_prices_changed(self, entity, attribute, old, new, kwargs):
         self.check_energy_prices(kwargs)
@@ -15,8 +24,8 @@ class CheapEnergyControl(hass.Hass):
     def check_energy_prices(self, kwargs):
         self.log("Checking energy prices")
 
-        # Get current time in local timezone
-        now = datetime.now(pytz.timezone(self.get_timezone()))
+        # Get current time in local timezone using stored timezone
+        now = datetime.now(pytz.timezone(self.timezone_str))
         current_hour = now.replace(minute=0, second=0, microsecond=0)
 
         # Get energy prices
@@ -41,7 +50,7 @@ class CheapEnergyControl(hass.Hass):
                     # Parse UTC timestamp with timezone offset
                     price_time = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S%z")
                     # Convert to local time
-                    price_time_local = price_time.astimezone(pytz.timezone(self.get_timezone()))
+                    price_time_local = price_time.astimezone(pytz.timezone(self.timezone_str))
                     # Get just the hour
                     price_hour = price_time_local.replace(minute=0, second=0, microsecond=0)
 
